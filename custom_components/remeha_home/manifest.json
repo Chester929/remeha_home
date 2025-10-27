@@ -1,8 +1,9 @@
 {
-  "domain": "remeha_home",
-  "name": "Remeha Home",
+  "domain": "remeha_home_by_chester",
+  "name": "Remeha Home by Chester",
   "codeowners": [
-    "@msvisser"
+    "@msvisser",
+    "@chester929"
   ],
   "config_flow": true,
   "documentation": "https://github.com/msvisser/remeha_home",
