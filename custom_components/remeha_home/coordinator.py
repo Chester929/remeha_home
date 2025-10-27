@@ -178,12 +178,38 @@ class RemehaHomeUpdateCoordinator(DataUpdateCoordinator):
 
             for hot_water_zone in appliance["hotWaterZones"]:
                 hot_water_zone_id = hot_water_zone["hotWaterZoneId"]
+                # This assumes that all climate zones for an appliance share the same gateway
+                gateways = self.technical_info[appliance_id][
+                    "internetConnectedGateways"
+                ]
+
+                if len(gateways) > 1:
+                    _LOGGER.warning(
+                        "Appliance %s has more than one gateway, using technical information from the first one",
+                        appliance_id,
+                    )
+
+                if len(gateways) > 0:
+                    gateway_info = gateways[0]
+                else:
+                    _LOGGER.warning(
+                        "Appliance %s has no gateways, using unknown values",
+                        appliance_id,
+                    )
+                    gateway_info = {
+                        "name": "Unknown",
+                        "hardwareVersion": "Unknown",
+                        "softwareVersion": "Unknown",
+                    }
+
                 self.items[hot_water_zone_id] = hot_water_zone
                 self.device_info[hot_water_zone_id] = DeviceInfo(
                     identifiers={(DOMAIN, hot_water_zone_id)},
                     name=hot_water_zone["name"],
                     manufacturer="Remeha",
-                    model="Hot Water Zone",
+                    model=gateway_info["name"],
+                    hw_version=gateway_info["hardwareVersion"],
+                    sw_version=gateway_info["softwareVersion"],
                     via_device=(DOMAIN, appliance_id),
                 )
 
