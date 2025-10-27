@@ -98,7 +98,7 @@ class RemehaHomeAPI:
         response.raise_for_status()
 
     async def async_set_off(self, climate_zone_id: str):
-        """Set a climate zone to off."""
+        """Set a climate zone to off (anti-frost mode)."""
         response = await self._async_api_request(
             "POST",
             f"/climate-zones/{climate_zone_id}/modes/anti-frost",
@@ -121,6 +121,48 @@ class RemehaHomeAPI:
             "POST",
             f"/climate-zones/{climate_zone_id}/modes/fireplacemode",
             json={"fireplaceModeActive": enabled},
+        )
+        response.raise_for_status()
+
+    async def async_hw_set_off(self, hot_water_zone_id: str):
+        """Set a hot water zone off (anti-frost mode)."""
+        response = await self._async_api_request(
+            "POST",
+            f"/hot-water-zones/{hot_water_zone_id}/modes/anti-frost",
+        )
+        response.raise_for_status()
+
+    async def async_hw_set_schedule(self, hot_water_zone_id: str):
+        """Set a hot watter zone to schedule mode."""
+        response = await self._async_api_request(
+            "POST",
+            f"/hot-water-zones/{hot_water_zone_id}/modes/schedule",
+        )
+        response.raise_for_status()
+
+    async def async_hw_set_continuous_comfort(self, hot_water_zone_id: str):
+        """Set a hot watter zone to continuous-comfort mode."""
+        response = await self._async_api_request(
+            "POST",
+            f"/hot-water-zones/{hot_water_zone_id}/modes/continuous-comfort",
+        )
+        response.raise_for_status()
+
+    async def async_hw_set_reduced_setpoint(self, hot_water_zone_id: str, reduced_set_point: float):
+        """Set a reduced setpoint for a hot watter zone."""
+        response = await self._async_api_request(
+            "POST",
+            f"/hot-water-zones/{hot_water_zone_id}/reduced-setpoint",
+            json={"reducedSetpoint": reduced_set_point},
+        )
+        response.raise_for_status()
+
+    async def async_hw_set_comfort_setpoint(self, hot_water_zone_id: str, comfort_set_point: float):
+        """Set a comfort setpoint for a hot watter zone."""
+        response = await self._async_api_request(
+            "POST",
+            f"/hot-water-zones/{hot_water_zone_id}/comfort-setpoint",
+            json={"comfortSetpoint": comfort_set_point},
         )
         response.raise_for_status()
 
@@ -151,7 +193,6 @@ class RemehaHomeAPI:
         )
         response.raise_for_status()
         return await response.json()
-
 
 class RemehaHomeAuthFailed(Exception):
     """Error to indicate that authentication failed."""
@@ -301,8 +342,8 @@ class RemehaHomeOAuth2Implementation(AbstractOAuth2Implementation):
             allow_redirects=True,
         ) as response:
             # NOTE: The OAuth2 token request sometimes returns a "400 Bad Request" response. The root cause of this
-            #       problem has not been found, but this workaround allows you to reauthenticate at least. Otherwise
-            #       Home Assitant would get stuck on refreshing the token forever.
+            #       problem has not been found, but this workaround allows you to reauthenticate at least. Otherwise,
+            #       Home Assistant would get stuck on refreshing the token forever.
             if response.status == 400:
                 response_json = await response.json()
                 _LOGGER.error(
